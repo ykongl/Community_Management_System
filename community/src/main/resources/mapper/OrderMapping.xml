@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.OrderDao">
+    <select id="getOrderList" parameterType="com.example.community.bean.Order" resultType="com.example.community.bean.Order">
+        SELECT DISTINCT a.id,a.goodsId,a.orderNo,a.shopName,a.imgUrl,a.goodsName,a.orderPrice,a.orderNumber,a.orderStatus,a.createtime,
+               (SELECT DISTINCT COUNT(a.id)
+                    FROM tb_order a
+                    LEFT JOIN tb_ordercustomer b
+                    ON a.orderNo = b.orderNo
+                    <where>
+                        1 = 1
+                        <if test="orderNo != null and orderNo != ''">
+                            AND a.orderNo like "%"#{orderNo}"%"
+                        </if>
+                        <if test="userId != null and userId != ''">
+                            AND b.userId = #{userId}
+                        </if>
+                        AND a.del_flag = 0
+                    </where>
+                    ) AS total
+            FROM tb_order a
+            LEFT JOIN tb_ordercustomer b
+            ON a.orderNo = b.orderNo
+                <where>
+                    1 = 1
+                    <if test="orderNo != null and orderNo != ''">
+                       AND a.orderNo like "%"#{orderNo}"%"
+                    </if>
+                    <if test="userId != null and userId != ''">
+                        AND b.userId = #{userId}
+                    </if>
+                       AND a.del_flag = 0
+                </where>
+                ORDER BY a.id
+                LIMIT #{pageStart},#{pageSize}
+    </select>
+
+    <update id="deleteById" parameterType="com.example.community.bean.Order">
+        UPDATE tb_order
+            SET
+                del_flag = 1,
+                updatetime = current_time,
+                updateId = #{updateId}
+            WHERE
+                id = #{id}
+    </update>
+
+    <delete id="deleteCustomer" parameterType="com.example.community.bean.Order">
+         DELETE
+         FROM tb_ordercustomer
+            WHERE orderNo = #{orderNo}
+            AND userId = #{userId}
+            AND orderCustomer = #{orderCustomer}
+    </delete>
+
+    <select id="getCustomerList" parameterType="com.example.community.bean.Customer" resultType="com.example.community.bean.Customer">
+        SELECT id,orderNo,userId,orderCustomer,orderTime
+        FROM tb_ordercustomer
+        WHERE orderNo = #{orderNo}
+    </select>
+
+    <insert id="insertOrders" parameterType="com.example.community.bean.Order">
+        INSERT tb_order
+        (orderNO,goodsId,shopName,goodsName,imgUrl,orderPrice,orderNumber,orderStatus,createId,createtime,del_flag)
+        VALUES
+        (#{orderNo},#{goodsId},#{shopName},#{goodsName},#{imgUrl},#{orderPrice},#{number},#{orderStatus},#{createId},current_time,0)
+    </insert>
+
+    <insert id="insertCustomer" parameterType="com.example.community.bean.Customer">
+        INSERT tb_ordercustomer
+        (orderNo,userId,orderCustomer,number,orderTime)
+        VALUES
+        (#{orderNo},#{userId},#{orderCustomer},#{number},current_time)
+    </insert>
+
+    <update id="updateShopNumber" parameterType="com.example.community.bean.Order">
+        update tb_shopmall
+            SET
+                stock = stock - #{orderNumber}
+            WHERE id = #{goodsId}
+    </update>
+
+    <update id="updateOrderNumber" parameterType="com.example.community.bean.Order">
+        update tb_order
+            SET
+                orderNumber = orderNumber + #{number}
+            WHERE
+                goodsId = #{goodsId}
+                AND orderNo = #{orderNo}
+
+    </update>
+
+    <update id="updateStatus" parameterType="com.example.community.bean.Order">
+        UPDATE tb_order
+            SET
+                orderStatus = #{orderStatus}
+            WHERE orderNo = #{orderNo}
+    </update>
+</mapper>

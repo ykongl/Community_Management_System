@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.CommunityDao">
+<!--    社区列表查询-->
+    <select id="selectCommunity" parameterType="com.example.community.bean.Community" resultType="com.example.community.bean.Community">
+        SELECT id,community_code AS communityCd,community_name AS communityName,community_place AS
+            communityPlace,community_area AS communityArea,people_number AS peopleNumber,old_number AS
+            oldNumber,state,updateTime,
+            (
+            SELECT COUNT(*)
+                FROM tb_communities
+            <where>
+                1 = 1
+                <if test="communityCd != null and communityCd != ''">
+                   AND community_code = #{communityCd}
+                </if>
+                    AND del_flag = 0
+            </where>) AS total
+            FROM tb_communities
+            <where>
+                1 = 1
+                <if test="communityCd != null and communityCd != ''">
+                   AND community_code = #{communityCd}
+                </if>
+                AND del_flag = 0
+            </where>
+            ORDER BY id
+            LIMIT #{pageStart},#{pageSize}
+    </select>
+<!--社区详情-->
+    <select id="getCommunityById" parameterType="com.example.community.bean.Community" resultType="com.example.community.bean.Community">
+        SELECT id,community_code AS communityCd,community_name AS communityName,community_place AS
+            communityPlace,community_area AS communityArea,people_number AS peopleNumber,old_number AS
+                oldNumber
+        FROM tb_communities
+        WHERE id = #{id}
+    </select>
+<!--  删除  -->
+    <update id="deleteCommunity" parameterType="com.example.community.bean.Community">
+        UPDATE tb_communities
+        SET
+            del_flag = 1,
+            updateId = #{updateId},
+            updateTime = current_time
+        WHERE id = #{id}
+    </update>
+
+<!--    修改-->
+    <update id="updateCommunity" parameterType="com.example.community.bean.Community">
+        UPDATE tb_communities
+        SET
+            community_area = #{communityArea},
+            people_number = #{peopleNumber},
+            old_number = #{oldNumber},
+            updateId = #{updateId},
+            updateTime = current_time
+        WHERE id = #{id}
+    </update>
+
+<!--    添加-->
+    <insert id="insertCommunity" parameterType="com.example.community.bean.Community">
+        INSERT tb_communities
+        (community_code,community_name,community_place,community_area,people_number,old_number,del_flag,createId,createtime,updateId,updateTime)
+        VALUES
+        (#{communityCd},#{communityName},#{communityPlace},#{communityArea},#{peopleNumber},#{oldNumber},'0',#{id},current_time,#{id},current_time)
+    </insert>
+
+<!--    修改状态-->
+    <update id="updateState" parameterType="com.example.community.bean.Community">
+        UPDATE tb_communities
+            SET
+                state = #{state},
+                updateId = #{updateId},
+                updateTime = current_time
+            WHERE
+                id = #{id}
+    </update>
+</mapper>

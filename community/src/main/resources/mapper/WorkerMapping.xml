@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.WorkerDao">
+<!--    获取列表信息-->
+    <select id="selectWorker" parameterType="com.example.community.bean.Worker" resultType="com.example.community.bean.Worker">
+        SELECT a.id,a.workNo,a.phone,a.workname,b.role,a.sex,a.state,a.updateTime
+        FROM tb_worker a
+        LEFT JOIN tb_role b
+        ON a.roleId = b.roleId
+        <where>
+            1 = 1
+            <if test="query != null">
+                AND (
+                a.workNo like "%"#{query}"%"
+                OR a.workname like "%"#{query}"%"
+                )
+            </if>
+            <if test="roleId != null and roleId != ''">
+                AND a.roleId = #{roleId}
+            </if>
+            <if test="updateId != null and updateId != ''">
+                AND a.id != #{updateId}
+            </if>
+            AND a.del_flag = '0'
+            AND b.roleId != 1
+        </where>
+        ORDER BY a.id
+        LIMIT #{pageStart},#{pageSize}
+    </select>
+<!--获取总数-->
+    <select id="getCounts" resultType="java.lang.Integer">
+        SELECT COUNT(*)
+        FROM tb_worker a
+        LEFT JOIN tb_role b
+        ON a.roleId = b.roleId
+        <where>
+            1 = 1
+            <if test="query != null">
+                AND (
+                a.workNo like "%"#{query}"%"
+                OR a.workname like "%"#{query}"%"
+                )
+            </if>
+            <if test="roleId != null and roleId != ''">
+                AND a.roleId = #{roleId}
+            </if>
+            <if test="updateId != null and updateId != ''">
+                AND a.id != #{updateId}
+            </if>
+            AND b.roleId != 1
+            AND a.del_flag = '0'
+        </where>
+    </select>
+<!--    修改状态-->
+    <update id="updateState" parameterType="com.example.community.bean.Worker">
+        update tb_worker
+        SET
+            state = #{state},
+            updateId = #{updateId},
+            updatetime = current_time
+        WHERE id = #{id}
+    </update>
+<!--详情-->
+    <select id="getWorkerById" parameterType="com.example.community.bean.Worker" resultType="com.example.community.bean.Worker">
+        SELECT a.id,a.workNo,a.phone,a.workname,a.sex,b.role,a.roleId,c.hospitalId,c.departmentId,a.password
+        FROM tb_worker a
+        LEFT JOIN tb_role b
+        ON a.roleId = b.roleId
+        LEFT JOIN tb_doctor c
+        ON a.workname = c.doctor
+        WHERE a.id = #{id}
+    </select>
+<!--删除-->
+    <update id="deleteWorkerById" parameterType="com.example.community.bean.Worker">
+        UPDATE tb_worker
+        SET
+            del_flag = 1,
+            updateId = #{updateId},
+            updatetime = current_time
+        WHERE id = #{id}
+    </update>
+
+<!--    修改-->
+    <update id="updateWorker" parameterType="com.example.community.bean.Worker">
+        UPDATE tb_worker
+        SET
+           phone = #{phone},
+           roleId = #{roleId},
+           updateId = #{updateId},
+           updatetime = current_time
+        WHERE id = #{id}
+    </update>
+
+<!--    新增-->
+    <insert id="insertWorker" parameterType="com.example.community.bean.Worker">
+        INSERT tb_worker
+        (workNo,workname,password,sex,phone,roleId,del_flag,createId,createtime,updateId,updateTime)
+        VALUES
+        (#{workNo},#{workName},#{password},#{sex},#{phone},#{roleId},'0',#{id},
+        current_time,#{id},current_time)
+    </insert>
+
+    <insert id="insertDoctor" parameterType="com.example.community.bean.Worker">
+        INSERT tb_doctor
+        (doctor,hospitalId,departmentId)
+        VALUES
+        (#{workName},#{hospitalId},#{departmentId})
+    </insert>
+
+    <update id="updateDoctor" parameterType="com.example.community.bean.Worker">
+        UPDATE tb_doctor
+            SET
+                hospitalId = #{hospitalId},
+                departmentId = #{departmentId}
+            WHERE
+                doctor = #{workName}
+    </update>
+</mapper>

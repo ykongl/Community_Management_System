@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.UserDao">
+    <select id="getAllUser" parameterType="com.example.community.bean.User" resultType="com.example.community.bean.User">
+        SELECT a.id,a.username,a.sex,a.phone,c.community_name AS communityName,b.role,
+        a.state,a.updatetime
+        FROM tb_user a
+        LEFT JOIN tb_role b
+        ON a.roleId = b.roleId
+        LEFT JOIN tb_communities c
+        ON a.communityCd= c.community_code
+        <where>
+            1 = 1
+            <if test="username != null">
+                AND a.username like "%"#{username}"%"
+            </if>
+            <if test="communityCd != null and communityCd != ''">
+                AND a.communityCd = #{communityCd}
+            </if>
+            <if test="roleId != null and roleId != ''">
+                AND a.roleId = #{roleId}
+            </if>
+                AND a.del_flag = '0'
+                AND c.state = 1
+        </where>
+        ORDER BY a.id
+        LIMIT #{pageStart},#{pageSize}
+    </select>
+
+    <select id="getUserCounts" resultType="java.lang.Integer">
+        SELECT count(*)
+        FROM tb_user a
+        LEFT JOIN tb_role b
+        ON a.roleId = b.roleId
+        LEFT JOIN tb_communities c
+        ON a.communityCd= c.community_code
+        <where>
+            1 = 1
+            <if test="username != null">
+                AND a.username like "%"#{username}"%"
+            </if>
+            <if test="communityCd != null and communityCd != ''">
+                AND a.communityCd = #{communityCd}
+            </if>
+            <if test="roleId != null and roleId != ''">
+                AND a.roleId = #{roleId}
+            </if>
+            AND a.del_flag = '0'
+            AND c.state = 1
+        </where>
+    </select>
+
+    <update id="updateState" parameterType="com.example.community.bean.User">
+        UPDATE tb_user
+        SET
+            state = #{state},
+            updateId = #{updateId},
+            updatetime = current_time
+        WHERE id = #{id}
+    </update>
+
+    <insert id="insertUser" parameterType="com.example.community.bean.User">
+    INSERT tb_user
+    (username,password,sex,phone,communityCd,roleId,del_flag,createId,createtime,updateId,updateTime)
+    VALUES
+    (#{username},#{password},#{sex},#{phone},#{communityCd},4,'0',#{id},
+    current_time,#{id},current_time)
+    </insert>
+
+    <delete id="deleteUser" parameterType="com.example.community.bean.User">
+        UPDATE tb_user
+        SET
+            del_flag = '1',
+            updateId = #{updateId},
+            updatetime = current_time
+        WHERE id = #{id}
+    </delete>
+
+    <select id="selectUserById" parameterType="com.example.community.bean.User" resultType="com.example.community.bean.User">
+    SELECT a.id,a.username,a.phone,a.sex,a.communityCd,a.roleId,b.role,a.password
+    FROM tb_user a
+    LEFT JOIN tb_role b
+    ON a.roleId = b.roleId
+    LEFT JOIN tb_communities c
+    ON a.communityCd = c.community_code
+    WHERE a.id = #{id}
+    </select>
+
+    <update id="updateUser" parameterType="com.example.community.bean.User">
+        UPDATE tb_user
+        SET
+            username = #{username},
+            phone = #{phone},
+            communityCd = #{communityCd},
+            roleId = #{roleId},
+            updateId = #{updateId},
+            updatetime = current_time
+        WHERE id = #{id}
+    </update>
+
+
+    <select id="selectAddress" parameterType="com.example.community.bean.User"
+    resultType="com.example.community.bean.User">
+    SELECT id,community_name as communityName,community_code as communityCd
+    FROM tb_communities
+    WHERE state = 1 AND del_flag = 0
+    </select>
+</mapper>

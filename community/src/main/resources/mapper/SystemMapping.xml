@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.SystemDao">
+    <select id="getCount" resultType="com.example.community.bean.System">
+        SELECT COUNT(*) AS userNumber,
+            (SELECT COUNT(*) FROM tb_communities WHERE del_flag = 0) AS communityNumber,
+            (SELECT COUNT(*) FROM tb_news WHERE del_flag = 0) AS newsNumber,
+            ((SELECT COUNT(*) FROM tb_medical WHERE del_flag = 0)
+            +(SELECT COUNT(*) FROM tb_order WHERE del_flag = 0)
+            +(SELECT COUNT(*) FROM tb_foodorder WHERE del_flag = 0)) AS orderNumber
+        FROM tb_user
+        WHERE del_flag = 0
+    </select>
+
+    <insert id="insertNews" parameterType="com.example.community.bean.System">
+        INSERT tb_news
+            (username,news,createtime,del_flag)
+        VALUES
+            (#{username},#{news},current_time,0)
+    </insert>
+
+    <select id="getNewsList" parameterType="com.example.community.bean.System" resultType="com.example.community.bean.System">
+        SELECT username,news,createTime
+        FROM tb_news
+        WHERE del_flag = 0
+    </select>
+
+
+    <select id="getStackedList" resultType="com.example.community.bean.Stacked">
+       SELECT COUNT(*) AS newsCount, ((SELECT COUNT(*) FROM tb_user WHERE loginTime = current_date - 6) + (SELECT COUNT(*) FROM tb_worker WHERE loginTime = current_date - 6)) AS userCount,
+              ((SELECT COUNT(*) FROM tb_medical WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                        current_date - 6)
+                  +(SELECT COUNT(*) FROM tb_order WHERE del_flag = 0 AND cast(createtime as Date) =
+                      current_date - 6)
+                      +(SELECT COUNT(*) FROM tb_foodorder WHERE del_flag = 0 AND cast(createtime as Date) =
+                        current_date - 6)) AS orderCount,
+              (SELECT date_sub(curdate(), interval 6 day)) as loginTime
+        FROM tb_news
+        WHERE cast(createtime as Date) = current_date - 6
+        UNION ALL
+       SELECT COUNT(*) AS newsCount, ((SELECT COUNT(*) FROM tb_user WHERE loginTime = current_date - 5) + (SELECT COUNT(*) FROM tb_worker WHERE loginTime = current_date - 5)) AS userCount,
+              ((SELECT COUNT(*) FROM tb_medical WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                       current_date - 5)
+                  +(SELECT COUNT(*) FROM tb_order WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                         current_date - 5)
+                  +(SELECT COUNT(*) FROM tb_foodorder WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                    current_date - 5)) AS orderCount,
+              (SELECT date_sub(curdate(), interval 5 day)) as loginTime
+       FROM tb_news
+       WHERE cast(createtime as Date) = current_date - 5
+       UNION ALL
+       SELECT COUNT(*) AS newsCount, ((SELECT COUNT(*) FROM tb_user WHERE loginTime = current_date - 4) + (SELECT COUNT(*) FROM tb_worker WHERE loginTime = current_date - 4)) AS userCount,
+              ((SELECT COUNT(*) FROM tb_medical WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                       current_date - 4)
+                  +(SELECT COUNT(*) FROM tb_order WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                         current_date - 4)
+                  +(SELECT COUNT(*) FROM tb_foodorder WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                    current_date - 4)) AS orderCount,
+              (SELECT date_sub(curdate(), interval 4 day)) as loginTime
+       FROM tb_news
+       WHERE cast(createtime as Date) = current_date - 4
+
+       UNION ALL
+       SELECT COUNT(*) AS newsCount, ((SELECT COUNT(*) FROM tb_user WHERE loginTime = current_date - 3) + (SELECT COUNT(*) FROM tb_worker WHERE loginTime = current_date - 3)) AS userCount,
+              ((SELECT COUNT(*) FROM tb_medical WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                       current_date - 3)
+                  +(SELECT COUNT(*) FROM tb_order WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                         current_date - 3)
+                  +(SELECT COUNT(*) FROM tb_foodorder WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                    current_date - 3)) AS orderCount,
+              (SELECT date_sub(curdate(), interval 3 day)) as loginTime
+       FROM tb_news
+       WHERE cast(createtime as Date) = current_date - 3
+
+       UNION ALL
+       SELECT COUNT(*) AS newsCount, ((SELECT COUNT(*) FROM tb_user WHERE loginTime = current_date - 2) + (SELECT COUNT(*) FROM tb_worker WHERE loginTime = current_date - 2)) AS userCount,
+              ((SELECT COUNT(*) FROM tb_medical WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                       current_date - 2)
+                  +(SELECT COUNT(*) FROM tb_order WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                         current_date - 2)
+                  +(SELECT COUNT(*) FROM tb_foodorder WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                    current_date - 2)) AS orderCount,
+              (SELECT date_sub(curdate(), interval 2 day)) as loginTime
+       FROM tb_news
+       WHERE cast(createtime as Date) = current_date - 2
+
+       UNION ALL
+       SELECT COUNT(*) AS newsCount, ((SELECT COUNT(*) FROM tb_user WHERE loginTime = current_date - 1) + (SELECT COUNT(*) FROM tb_worker WHERE loginTime = current_date - 1)) AS userCount,
+              ((SELECT COUNT(*) FROM tb_medical WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                       current_date - 1)
+                  +(SELECT COUNT(*) FROM tb_order WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                         current_date - 1)
+                  +(SELECT COUNT(*) FROM tb_foodorder WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                        current_date - 1)) AS orderCount,
+              (SELECT date_sub(curdate(), interval 1 day)) as loginTime
+       FROM tb_news
+       WHERE cast(createtime as Date) = current_date - 1
+
+       UNION ALL
+       SELECT COUNT(*) AS newsCount, ((SELECT COUNT(*) FROM tb_user WHERE loginTime = current_date) + (SELECT COUNT(*) FROM tb_worker WHERE loginTime = current_date)) AS userCount,
+              ((SELECT COUNT(*) FROM tb_medical WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                       current_date)
+                  +(SELECT COUNT(*) FROM tb_order WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                         current_date)
+                  +(SELECT COUNT(*) FROM tb_foodorder WHERE del_flag = 0 AND cast(createtime as Date) =
+                                                                            current_date)) AS orderCount,
+              (SELECT current_date) as loginTime
+       FROM tb_news
+       WHERE cast(createtime as Date) = current_date
+    </select>
+</mapper>

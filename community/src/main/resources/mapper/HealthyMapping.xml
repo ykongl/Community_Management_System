@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.HealthyDao">
+<!--    档案列表-->
+    <select id="selectHealthyList" parameterType="com.example.community.bean.Healthy"
+    resultType="com.example.community.bean.Healthy">
+        SELECT a.id,a.files,a.older_id AS olderId,b.older_name AS olderName,c.workname AS workName,a.createtime,(SELECT COUNT(*)
+                FROM tb_healthyfiles a
+                LEFT JOIN tb_older b
+                ON a.older_id = b.id
+                LEFT JOIN tb_worker c
+                ON a.createId = c.id
+                <where>
+                    1 = 1
+                    <if test="olderId != null and olderId != ''">
+                       AND a.older_id = #{olderId}
+                    </if>
+                    <if test="time != null">
+                        AND a.createtime like "%"#{time}"%"
+                    </if>
+                    <if test="userId != null and userId != ''">
+                        AND a.user_id = #{userId}
+                    </if>
+                    AND a.del_flag = '0'
+                    AND b.state = 1
+                    AND b.del_flag = '0'
+                </where>
+            ) AS total
+        FROM tb_healthyfiles a
+        LEFT JOIN tb_older b
+        ON a.older_id = b.id
+        LEFT JOIN tb_worker c
+        ON a.createId = c.id
+        <where>
+            1 = 1
+            <if test="olderId != null and olderId != ''">
+               AND a.older_id = #{olderId}
+            </if>
+            <if test="time != null">
+                AND a.createtime like "%"#{time}"%"
+            </if>
+            <if test="userId != null and userId != ''">
+                AND a.user_id = #{userId}
+            </if>
+                AND a.del_flag = '0'
+                AND b.state = 1
+                AND b.del_flag = '0'
+        </where>
+        ORDER BY a.id
+        LIMIT #{pageStart},#{pageSize}
+    </select>
+<!--    老人下拉框-->
+    <select id="getOlderDrop" parameterType="com.example.community.bean.Healthy" resultType="com.example.community.bean.Healthy">
+        SELECT id AS olderId,older_name AS olderName
+        FROM tb_older
+        WHERE del_flag = '0'
+        AND state = 1
+        <if test="userId != null and userId != ''">
+           AND user_Id = #{userId}
+        </if>
+    </select>
+
+    <select id="getWorkDrop" parameterType="com.example.community.bean.Healthy" resultType="com.example.community.bean.Healthy">
+        SELECT id AS workId,workname AS workName
+        FROM tb_worker
+        WHERE roleId = 2
+        AND del_flag = '0'
+        AND state = 1
+    </select>
+
+<!--    删除-->
+    <update id="deleteHealthy" parameterType="com.example.community.bean.Healthy">
+        UPDATE
+                tb_healthyfiles a,
+                tb_surgery b,
+                tb_internal c
+            SET
+                a.del_flag = 1,
+                b.del_flag = 1,
+                c.del_flag = 1,
+                a.updateId = #{updateId},
+                a.updatetime = current_time,
+                b.updateId = #{updateId},
+                b.updatetime = current_time,
+                c.updateId = #{updateId},
+                c.updatetime = current_time
+            WHERE
+                a.id = b.healthy_Id
+                AND a.id = c.healthy_Id
+                AND a.id = #{id}
+    </update>
+
+<!--    获取健康档案的基本信息-->
+    <select id="getHealthyInfo" parameterType="com.example.community.bean.Healthy" resultType="com.example.community.bean.Healthy">
+    SELECT a.id,a.older_id AS olderId,a.user_id AS userId,a.height,a.weight,
+           a.nation,b.birthday,a.native_place AS nativePlace,a.marital_status AS
+           maritalStatus,a.work_year AS workYear,a.education_level AS
+           educationLevel,a.career,b.older_age AS olderAge,b.sex,b.photo,CONCAT(
+           d.community_place,',',d.community_name) AS address,a.files
+    FROM tb_healthyfiles a
+    LEFT JOIN tb_older b
+    ON a.older_id = b.Id
+    LEFT JOIN tb_user c
+    ON a.user_id = c.id
+    LEFT JOIN tb_communities d
+    ON b.communityCd = d.community_code
+    WHERE a.id = #{id}
+    </select>
+
+<!--    获取外科信息-->
+    <select id="getSurgeryInfo" parameterType="com.example.community.bean.Surgery" resultType="com.example.community.bean.Surgery">
+    SELECT a.healthy_Id AS healthyId,a.skin,a.lymph,a.thyroid,a.spine,
+           a.limb,a.joint,a.head,a.eye,a.ears,a.nose,a.oral_cavity AS
+           oralCavity,a.throat,a.work_Id AS workId
+    FROM tb_surgery a
+    LEFT JOIN tb_healthyfiles c
+    ON a.healthy_Id = c.id
+    WHERE
+        c.id = #{id}
+    </select>
+<!--    获取内科信息-->
+    <select id="getInternalInfo" parameterType="com.example.community.bean.Internal" resultType="com.example.community.bean.Internal">
+        SELECT healthy_Id AS healthyId,a.heart_rate AS heartRate,a.blood_pressure AS bloodPressure,a.blood_sugar AS bloodSugar,
+        a.blood_fat AS bloodFat,a.pulse,a.liver_function AS liverFunction,a.renal_function AS renalFunction,a.blood_routine AS
+        bloodRoutine,a.urinalysis,a.work_Id AS workId
+        FROM tb_internal a
+        LEFT JOIN tb_healthyfiles c
+        ON a.healthy_Id = c.id
+        WHERE
+            c.id = #{id}
+    </select>
+
+<!--    修改-->
+    <update id="updateHealthy" parameterType="com.example.community.bean.Healthy">
+        UPDATE
+            tb_healthyfiles a,
+            tb_surgery b,
+            tb_internal c,
+            tb_older d
+        SET
+            a.user_id = #{userId},
+            d.user_id = #{userId},
+            a.height = #{height},
+            a.weight = #{weight},
+            d.older_age = #{olderAge},
+            a.marital_status =#{maritalStatus},
+            a.career = #{career},
+            a.work_year = #{workYear},
+            b.skin = #{skin},
+            b.lymph = #{lymph},
+            b.thyroid = #{thyroid},
+            b.spine = #{spine},
+            b.limb = #{limb},
+            b.joint = #{joint},
+            b.head = #{head},
+            b.eye = #{eye},
+            b.ears = #{ears},
+            b.nose = #{nose},
+            b.oral_cavity = #{oralCavity},
+            b.throat = #{throat},
+            c.heart_rate = #{heartRate},
+            c.blood_pressure = #{bloodPressure},
+            c.blood_sugar = #{bloodSugar},
+            c.blood_fat = #{bloodFat},
+            c.pulse = #{pulse},
+            c.liver_function = #{liverFunction},
+            c.renal_function = #{renalFunction},
+            c.blood_routine = #{bloodRoutine},
+            c.urinalysis = #{urinalysis},
+            a.updateId = #{updateId},
+            b.updateId = #{updateId},
+            c.updateId = #{updateId},
+            d.updateId = #{updateId},
+            a.updatetime = current_time,
+            b.updatetime = current_time,
+            c.updatetime = current_time,
+            d.updatetime = current_time
+        WHERE a.id = b.healthy_Id
+            AND a.id = c.healthy_Id
+            AND a.older_Id = d.id
+            AND a.id = #{id}
+    </update>
+
+    <insert id="insertHealthy" parameterType="com.example.community.bean.Healthy"  useGeneratedKeys="true" keyProperty="id">
+        INSERT tb_healthyfiles
+        (older_id,user_id,height,weight,nation,native_place,marital_status,
+work_year,education_level,career,files,del_flag,createId,createtime)
+        VALUES
+        (#{olderId},#{userId},#{height},#{weight},#{nation},#{nativePlace},#{maritalStatus},#{workYear},#{educationLevel},#{career},#{files},0,#{createId},current_time)
+    </insert>
+
+    <insert id="insertSurgery" parameterType="com.example.community.bean.Healthy">
+        INSERT tb_surgery
+        (healthy_id,older_Id,skin,lymph,thyroid,spine,limb,joint,head,eye,ears,nose,oral_cavity,throat,work_Id,del_flag,createId,createtime)
+        VALUES
+        (#{healthyId},#{olderId},#{skin},#{lymph},#{thyroid},#{spine},#{limb},#{joint},
+        #{head},#{eye},#{ears},#{nose},#{oralCavity},#{throat},#{workId},0,#{createId},current_time)
+    </insert>
+
+    <insert id="insertInternal" parameterType="com.example.community.bean.Healthy">
+        INSERT tb_internal
+        (healthy_id,older_Id,heart_rate,blood_pressure,blood_sugar,blood_fat,pulse,
+liver_function,renal_function,blood_routine,urinalysis,work_Id,del_flag,createId,createtime)
+        VALUES
+        (#{healthyId},#{olderId},#{heartRate},#{bloodPressure},#{bloodSugar},
+        #{bloodFat},#{pulse},#{liverFunction},#{renalFunction},
+#{bloodRoutine},#{urinalysis},#{workId},0,#{createId},current_time)
+    </insert>
+
+    <select id="getInternalList" parameterType="com.example.community.bean.Internal" resultType="com.example.community.bean.Internal">
+        SELECT a.older_id AS olderId,a.heart_rate AS heartRate,a.blood_pressure AS bloodPressure,a.blood_sugar AS bloodSugar,a.blood_fat AS bloodFat,a.urinalysis,b.createtime AS createTime,
+        c.photo
+        FROM tb_internal a
+        LEFT JOIN tb_healthyfiles b
+        ON a.healthy_id = b.id
+        LEFT JOIN tb_older c
+        ON a.older_id = c.id
+        WHERE a.older_id = #{olderId}
+    </select>
+</mapper>

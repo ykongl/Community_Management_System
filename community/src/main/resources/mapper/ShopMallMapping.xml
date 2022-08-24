@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.ShopMallDao">
+    <select id="getGoodsList" parameterType="com.example.community.bean.ShopMall" resultType="com.example.community.bean.ShopMall">
+        SELECT id,goodsName,goodsUnit,goodsPrice,shopName,qualityGuarantee,stock,goodsImgUrl,
+               (SELECT
+                    COUNT(*)
+                FROM tb_shopmall
+                <where>
+                    1 = 1
+                    <if test="goodsName != null and goodsName != ''">
+                        AND goodsName like "%"#{goodsName}"%"
+                    </if>
+                    <if test="shopName != null and shopName != ''">
+                        AND shopName like "%"#{shopName}"%"
+                    </if>
+                    AND del_flag = 0
+                </where>) AS total
+        FROM tb_shopmall
+        <where>
+            1 = 1
+            <if test="goodsName != null and goodsName != ''">
+                AND goodsName like "%"#{goodsName}"%"
+            </if>
+            <if test="shopName != null and shopName != ''">
+                AND shopName like "%"#{shopName}"%"
+            </if>
+                AND del_flag = 0
+        </where>
+        ORDER BY Id
+        LIMIT #{pageStart},#{pageSize}
+    </select>
+    <insert id="addGoods" parameterType="com.example.community.bean.ShopMall">
+        INSERT tb_shopmall
+        (goodsName,goodsImgUrl,goodsPrice,goodsUnit,shopName,qualityGuarantee,stock,del_flag,createId,createtime)
+        VALUES
+        (#{goodsName},#{goodsImgUrl},#{goodsPrice},#{goodsUnit},#{shopName},#{qualityGuarantee},#{stock},0,#{createId},current_time)
+    </insert>
+
+    <update id="deleteGoodsById" parameterType="com.example.community.bean.ShopMall">
+        UPDATE tb_shopmall
+            SET
+                del_flag = 1,
+                updateId = #{updateId},
+                updatetime = current_time
+            WHERE
+                id = #{id}
+    </update>
+</mapper>

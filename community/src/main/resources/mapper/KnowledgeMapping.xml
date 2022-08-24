@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.KnowledgeDao">
+<!--    列表-->
+    <select id="getKnowledgeList" parameterType="com.example.community.bean.Knowledge" resultType="com.example.community.bean.Knowledge">
+            SELECT a.id,a.book_name AS bookName,a.read_number AS readNumber,a.introduction,a.createTime,a.create_name AS createName,a.style,
+                   a.createId,a.roleId,
+            (SELECT COUNT(*)
+                            FROM tb_knowledge a
+                            <where>
+                                1 = 1
+                            <if test="bookName != null and bookName != ''">
+                                    AND a.book_name like "%"#{bookName}"%"
+                            </if>
+                            <if test="createName != null and createName != ''">
+                                    AND a.create_name like "%"#{createName}"%"
+                            </if>
+                            <if test="createId != null and createId != ''">
+                                    AND a.createId like "%"#{createId}"%"
+                            </if>
+                            <if test="roleId != null and roleId != ''">
+                                    AND a.roleId like "%"#{roleId}"%"
+                            </if>
+                            <if test="style != null and style != ''">
+                                    AND a.style = #{style}
+                            </if>
+                                    AND a.del_flag = 0
+                            </where>) AS total
+            FROM tb_knowledge a
+            <where>
+                1 = 1
+                <if test="bookName != null and bookName != ''">
+                    AND a.book_name like "%"#{bookName}"%"
+                </if>
+                <if test="createName != null and createName != ''">
+                    AND a.create_name like "%"#{createName}"%"
+                </if>
+                <if test="createId != null and createId != ''">
+                    AND a.createId like "%"#{createId}"%"
+                </if>
+                <if test="roleId != null and roleId != ''">
+                    AND a.roleId like "%"#{roleId}"%"
+                </if>
+                <if test="style != null and style != ''">
+                    AND a.style = #{style}
+                </if>
+                AND a.del_flag = 0
+            </where>
+            ORDER BY a.id
+            LIMIT #{pageStart},#{pageSize}
+    </select>
+<!--    详情-->
+    <select id="getKnowledgeInfo" parameterType="com.example.community.bean.Knowledge" resultType="com.example.community.bean.Knowledge">
+        SELECT a.id,a.book_name AS bookName,a.read_number AS readNumber,a.introduction,a.content,a.createTime,a.create_name AS createName
+        FROM tb_knowledge a
+        WHERE a.id = #{id}
+    </select>
+<!--    删除-->
+    <update id="deleteKnowledgeById" parameterType="com.example.community.bean.Knowledge">
+        UPDATE tb_knowledge
+        SET
+            <if test="style == 0">
+                del_flag = 1,
+            </if>
+            <if test="style == 1">
+                style = '0',
+            </if>
+            updateId = #{updateId},
+            updateTime = current_time
+        WHERE
+            id = #{id}
+    </update>
+
+<!--    修改-->
+    <update id="updateKnowledge" parameterType="com.example.community.bean.Knowledge">
+            UPDATE tb_knowledge
+            SET
+                book_name = #{bookName},
+                introduction = #{introduction},
+                content = #{content},
+                style = #{style},
+                updateId = #{updateId},
+                updateTime = current_time
+            WHERE
+                id = #{id}
+    </update>
+<!--    新增-->
+    <insert id="insertKnowledge" parameterType="com.example.community.bean.Knowledge">
+            INSERT tb_knowledge
+            (book_name,read_number,introduction,create_name,content,style,del_flag,createId,createTime,roleId)
+            VALUES
+            (#{bookName},#{readNumber},#{introduction},#{createName},#{content},#{style},0,#{createId},current_time,#{roleId})
+    </insert>
+
+    <update id="updateNumber" parameterType="com.example.community.bean.Knowledge">
+        UPDATE tb_knowledge
+        SET
+            read_number = read_number + 1
+        WHERE
+            id = #{id}
+            AND #{style} = '1'
+    </update>
+
+</mapper>

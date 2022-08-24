@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.FoodOrderDao">
+    <select id="getFoodOrderList" parameterType="com.example.community.bean.FoodOrder" resultType="com.example.community.bean.FoodOrder">
+        SELECT a.id,a.foodOrderNo,a.contactNumber,a.orderPerson,a.address,a.foodNames,a.foodPrice,a.orderStatus,a.createtime,a.communityRestaurant,
+        (SELECT COUNT(*)
+        FROM tb_foodorder a
+        <where>
+            1 = 1
+            <if test="foodOrderNo != null and foodOrderNo != ''">
+                AND a.foodOrderNo like "%"#{foodOrderNo}"%"
+            </if>
+            <if test="orderPerson != null and orderPerson != ''">
+                AND a.orderPerson = #{orderPerson}
+            </if>
+                AND a.del_flag = 0
+        </where>
+        ) AS total
+        FROM tb_foodorder a
+        <where>
+            1 = 1
+            <if test="foodOrderNo != null and foodOrderNo != ''">
+                AND a.foodOrderNo like "%"#{foodOrderNo}"%"
+            </if>
+            <if test="orderPerson != null and orderPerson != ''">
+                AND a.orderPerson = #{orderPerson}
+            </if>
+                AND a.del_flag = 0
+        </where>
+        ORDER BY a.id
+        LIMIT #{pageStart},#{pageSize}
+    </select>
+
+    <insert id="insertRestaurant" parameterType="com.example.community.bean.CommunityRestaurant">
+        INSERT tb_communityrestaurant
+        (communityCd,restaurant,del_flag,createId,createtime)
+        VALUES
+        (#{communityCd},#{restaurant},0,#{createId},current_time)
+    </insert>
+
+    <select id="getRestaurants" parameterType="com.example.community.bean.CommunityRestaurant" resultType="com.example.community.bean.CommunityRestaurant">
+        SELECT restaurant
+        FROM tb_communityrestaurant
+        WHERE
+            communityCd = #{communityCd}
+        AND del_flag = 0
+    </select>
+
+    <insert id="insertFood" parameterType="com.example.community.bean.Food">
+        INSERT tb_food
+        (communityCd,restaurant,foodName,foodImgUrl,foodPrice,createId,createtime,del_flag)
+        VALUES
+        (#{communityCd},#{restaurant},#{foodName},#{foodImgUrl},#{foodPrice},#{createId},current_time,0)
+    </insert>
+
+    <select id="getFoodList" parameterType="com.example.community.bean.Food" resultType="com.example.community.bean.Food">
+        SELECT id,restaurant,foodName,foodImgUrl,foodPrice,
+               (SELECT COUNT(*)
+                FROM tb_food
+                WHERE
+                    communityCd = #{communityCd}
+                  AND restaurant = #{restaurant}
+                  AND del_flag = 0
+               ) AS total
+        FROM tb_food
+        WHERE
+            communityCd = #{communityCd}
+        AND restaurant = #{restaurant}
+        AND del_flag = 0
+    </select>
+
+    <insert id="insertFoodOrder" parameterType="com.example.community.bean.FoodOrder">
+        INSERT tb_foodorder
+        (foodOrderNo,contactNumber,orderPerson,address,communityRestaurant,communityId,foodNames,foodPrice,orderStatus,createId,createtime,del_flag)
+        VALUES
+        (#{foodOrderNo},#{contactNumber},#{orderPerson},#{address},#{communityRestaurant},#{communityId},#{foodNames},#{foodPrice},#{orderStatus},#{createId},current_time,0)
+    </insert>
+
+    <update id="deleteFoodOrderById" parameterType="com.example.community.bean.FoodOrder">
+        UPDATE tb_foodorder
+            SET
+                del_flag = 1,
+                updateId = #{updateId},
+                updatetime = current_time
+            WHERE
+                id = #{id}
+    </update>
+
+    <update id="deleteFoodById" parameterType="com.example.community.bean.Food">
+        UPDATE tb_food
+            SET
+                del_flag = 1,
+                updateId = #{updateId},
+                updatetime = current_time
+            WHERE
+                id = #{id}
+    </update>
+
+    <update id="updateStatus" parameterType="com.example.community.bean.FoodOrder">
+        UPDATE tb_foodorder
+            SET
+                orderStatus = #{orderStatus}
+            WHERE
+                foodOrderNo = #{foodOrderNo}
+    </update>
+
+</mapper>

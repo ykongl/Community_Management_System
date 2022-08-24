@@ -1,0 +1,26 @@
+文件夹 PATH 列表
+卷序列号为 00000253 2264:F894
+src:
+├─java
+│  └─com
+│      └─example
+│          └─community
+│              │  CommunityApplication.java				//启动类
+│              │  
+│              ├─bean						//实体层
+│              │      
+│              ├─controller					//前后端交互层
+│              │      
+│              ├─dao						//数据持久层
+│              │      
+│              ├─service						//业务逻辑层
+│              │  │  
+│              │  └─impl						//实现层
+│              │          
+│              └─util						//工具类
+│              │  CorsFilter.java					//解决springboot + vue 前后端分离api跨域问题
+│              │  WebConfig.java					//全局配置类--配置跨域请求	
+│              │
+└─resources
+    │  application.yml						//Mysql配置
+    ├─mapper						//数据库Sql文件

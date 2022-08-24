@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.OlderDao">
+<!--    查询列表-->
+    <select id="getAllOlderList" parameterType="com.example.community.bean.Older" resultType="com.example.community.bean.Older">
+        SELECT a.id,a.older_name AS olderName,a.sex,a.older_age AS olderAge,
+               b.community_name AS communityName,a.medical_history AS medicalHistory,a.photo,b.community_place AS address,c.username,a.state,a.updateTime,
+               (SELECT COUNT(*)
+                FROM tb_older a
+                LEFT JOIN tb_communities b
+                ON a.communityCd = b.community_code
+                LEFT JOIN tb_user c
+                ON a.user_id = c.id
+                <where>
+                    1 = 1
+                    <if test="olderName != null and olderName != ''">
+                        AND a.older_name like "%"#{olderName}"%"
+                    </if>
+                    <if test="userId != null and userId != ''">
+                        AND a.user_id = #{userId}
+                    </if>
+                    <if test="communityCd != null and communityCd != ''">
+                        AND a.communityCd = #{communityCd}
+                    </if>
+                    AND a.del_flag = 0
+                    AND b.del_flag = 0
+                    AND b.state = 1
+                    AND c.state = 1
+                    AND c.del_flag = 0
+                </where>
+                   ) AS total
+        FROM tb_older a
+        LEFT JOIN tb_communities b
+        ON a.communityCd = b.community_code
+        LEFT JOIN tb_user c
+        ON a.user_id = c.id
+        <where>
+            1 = 1
+            <if test="olderName != null and olderName != ''">
+                AND a.older_name like "%"#{olderName}"%"
+            </if>
+            <if test="userId != null and userId != ''">
+                AND a.user_id = #{userId}
+            </if>
+            <if test="communityCd != null and communityCd != ''">
+                AND a.communityCd = #{communityCd}
+            </if>
+                AND a.del_flag = 0
+                AND b.del_flag = 0
+                AND b.state = 1
+                AND c.state = 1
+                AND c.del_flag = 0
+        </where>
+        ORDER BY a.id
+        LIMIT #{pageStart},#{pageSize}
+    </select>
+<!--    获取详情-->
+    <select id="getOlderById" parameterType="com.example.community.bean.Older" resultType="com.example.community.bean.Older">
+        SELECT a.id,a.user_id AS userId,a.older_name AS olderName,a.sex,a.older_age AS olderAge,a.birthday,a.communityCd,a.medical_history AS medicalHistory,b.community_place AS address,a.photo,b.community_name AS communityName
+                 FROM tb_older a
+                 LEFT JOIN tb_communities b
+                 ON a.communityCd = b.community_code
+                 LEFT JOIN tb_user c
+                 ON a.user_id = c.id
+        WHERE a.id = #{id}
+    </select>
+<!--    修改状态-->
+    <update id="updateState" parameterType="com.example.community.bean.Older">
+        UPDATE tb_older
+        SET
+            state = #{state},
+            updateId = #{updateId},
+            updatetime = current_time
+        WHERE
+            id = #{id}
+    </update>
+<!--删除-->
+    <update id="deleteOlder" parameterType="com.example.community.bean.Older">
+        update tb_older
+        SET
+            del_flag = 1,
+            updateId = #{updateId},
+            updatetime = current_time
+        WHERE
+            id = #{id}
+    </update>
+
+<!--    监护人下拉框-->
+    <select id="selectUserList" parameterType="com.example.community.bean.Older" resultType="com.example.community.bean.Older">
+        SELECT id AS userId,username
+        FROM tb_user
+        WHERE state = 1 AND del_flag = 0
+    </select>
+<!--    修改-->
+    <update id="updateOlder" parameterType="com.example.community.bean.Older">
+        UPDATE tb_older
+        SET
+            user_id = #{userId},
+            communityCd = #{communityCd},
+            medical_history = #{medicalHistory},
+            updateId = #{updateId},
+            updatetime = current_time
+        WHERE
+            id = #{id}
+    </update>
+
+    <insert id="addOlder" parameterType="com.example.community.bean.Older">
+        INSERT
+            tb_older
+           (user_id,older_name,photo,sex,birthday,communityCd,medical_history,del_flag,createId,createtime,updateId,updateTime,older_age)
+    VALUES
+    (#{userId},#{olderName},#{photo},#{sex},#{birthday},#{communityCd},#{medicalHistory},'0',#{id},
+        current_time,#{id},current_time,#{olderAge})
+    </insert>
+
+    <insert id="addImg" parameterType="com.example.community.bean.Older">
+        INSERT
+            tb_image
+        (imgUrl)
+        VALUES
+        (#{imgUrl})
+    </insert>
+</mapper>

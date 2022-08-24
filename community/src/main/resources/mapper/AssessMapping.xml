@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.AssessDao">
+    <insert id="insertAssess" parameterType="com.example.community.bean.Assess">
+        INSERT tb_assess
+        (assess,createName,createTime)
+        VALUES
+        (#{assess},#{createName},current_time)
+    </insert>
+
+    <update id="updateUserAssess" parameterType="String">
+        UPDATE tb_user
+        SET isAssess = 1
+        WHERE id = #{workId}
+    </update>
+
+    <update id="updateWorkerAssess" parameterType="String">
+        UPDATE tb_worker
+        SET isAssess = 1
+        WHERE id = #{workId}
+    </update>
+
+    <select id="getCount" resultType="com.example.community.bean.Assess">
+        SELECT (SELECT COUNT(*) FROM tb_assess WHERE assess = 1) AS veryPoor,(SELECT COUNT(*) FROM tb_assess WHERE assess = 2) AS disappointed
+        ,(SELECT COUNT(*) FROM tb_assess WHERE assess = 3) AS generally,(SELECT COUNT(*) FROM tb_assess WHERE assess = 4) AS satisfy
+        ,(SELECT COUNT(*) FROM tb_assess WHERE assess = 5) AS surprise
+    </select>
+</mapper>

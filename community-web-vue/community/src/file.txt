@@ -1,0 +1,98 @@
+文件夹 PATH 列表
+卷序列号为 000001A6 2264:F894
+D:.
+│  App.vue
+│  file.txt
+│  main.js
+│  
+├─assets
+│  │  20201121175310768.png
+│  │  20201121175405724.png
+│  │  23176368020632682.jpg
+│  │  23176410054422867.jpg
+│  │  23176875181268638.jpg
+│  │  23177084467557645.jpg
+│  │  23177271556061774.jpg
+│  │  39weitai.jpg
+│  │  999ganmao.jpg
+│  │  bangdi.jpg
+│  │  biaozhi.jpg
+│  │  boy.jpg
+│  │  community.jpg
+│  │  furen.jpg
+│  │  junyu.jpg
+│  │  kanghua.jpg
+│  │  lianwang.jpg
+│  │  logo.png
+│  │  register.jpg
+│  │  sportback.jpg
+│  │  sportlogo.jpg
+│  │  tiantian.jpg
+│  │  xupopo.jpg
+│  │  yunnan.jpg
+│  │  
+│  ├─css
+│  │      global.css
+│  │      
+│  └─font
+│          demo.css
+│          demo_index.html
+│          iconfont.css
+│          iconfont.js
+│          iconfont.json
+│          iconfont.ttf
+│          iconfont.woff
+│          iconfont.woff2
+│          
+├─common
+│      community.jpg
+│      
+├─components
+│  │  Home.vue
+│  │  Login.vue
+│  │  Welcome.vue
+│  │  
+│  ├─active
+│  │      ActiveList.vue
+│  │      
+│  ├─admin
+│  │      WorkerList.vue
+│  │      
+│  ├─community
+│  │      CommunityList.vue
+│  │      
+│  ├─healthfiles
+│  │      Healthiness.vue
+│  │      HealthyData.vue
+│  │      HealthyInfo.vue
+│  │      
+│  ├─knowledge
+│  │      Knowledge.vue
+│  │      
+│  ├─mutualAid
+│  │  │  medical.vue
+│  │  │  Purchasing.vue
+│  │  │  repast.vue
+│  │  │  shoppingMall.vue
+│  │  │  
+│  │  └─Pharmacy
+│  │          Appointment.vue
+│  │          Pharmacy.vue
+│  │          PharmacyInfo.vue
+│  │          
+│  ├─User
+│  │      OlderInfoList.vue
+│  │      UserList.vue
+│  │      
+│  └─util
+│          quEditor.vue
+│          
+├─dashboard
+│      index.js
+│      
+├─plugins
+│      element.js
+│      
+└─router
+        index.js
+        

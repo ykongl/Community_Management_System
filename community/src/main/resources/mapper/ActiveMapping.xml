@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.ActiveDao">
+    <select id="getActiveList" parameterType="com.example.community.bean.Active" resultType="com.example.community.bean.Active">
+    SELECT DISTINCT a.id,a.active_name AS activeName,a.active_time AS activeTime,a.duration,
+           a.active_area AS activeArea,a.active_style AS activeStyle,a.create_name
+            AS createName,a.active_number AS activeNumber,a.createtime AS createTime,
+           (SELECT DISTINCT COUNT(DISTINCT a.id)
+            FROM tb_actives a
+            LEFT JOIN tb_joins b
+            ON a.id = b.activeId
+        <where>
+            1 = 1
+            <if test="activeName != null and activeName != ''">
+                AND a.active_name like "%"#{activeName}"%"
+            </if>
+            <if test="activeArea != null and activeArea != ''">
+                AND a.active_area like "%"#{activeArea}"%"
+            </if>
+            <if test="joinId != null and joinId != ''">
+                AND b.joinId = #{joinId}
+            </if>
+            AND a.del_flag = '0'
+        </where>
+            ) AS total
+        FROM tb_actives a
+        LEFT JOIN tb_joins b
+        ON a.id = b.activeId
+        <where>
+            1 = 1
+            <if test="activeName != null and activeName != ''">
+                AND a.active_name like "%"#{activeName}"%"
+            </if>
+            <if test="activeArea != null and activeArea != ''">
+                AND a.active_area like "%"#{activeArea}"%"
+            </if>
+            <if test="joinId != null and joinId != ''">
+                AND b.joinId = #{joinId}
+            </if>
+                AND a.del_flag = '0'
+        </where>
+        ORDER BY a.id
+        LIMIT #{pageStart},#{pageSize}
+    </select>
+
+    <select id="getActiveInfo" parameterType="com.example.community.bean.Active" resultType="com.example.community.bean.Active">
+        SELECT id,active_name AS activeName,active_time AS activeTime,duration,
+               active_area AS activeArea,active_style AS activeStyle,create_name
+                              AS createName,active_number AS activeNumber,createtime
+                                  AS createTime
+        FROM tb_actives
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertActive" parameterType="com.example.community.bean.Active">
+            INSERT tb_actives
+            (active_name,active_time,duration,active_area,active_style,create_name,active_number,createId,createtime,del_flag)
+            VALUES
+            (#{activeName},#{activeTime},#{duration},#{activeArea},#{activeStyle},#{createName},#{activeNumber},#{createId},current_time,'0')
+    </insert>
+
+    <update id="updateActive" parameterType="com.example.community.bean.Active">
+        UPDATE tb_actives
+        SET
+            active_name = #{activeName},
+            active_area = #{activeArea},
+            active_time = #{activeTime},
+            duration = #{duration},
+            active_style = #{activeStyle},
+            updateId = #{updateId},
+            updatetime = current_time
+        WHERE id = #{id}
+    </update>
+
+    <update id="deleteActive" parameterType="com.example.community.bean.Active">
+        UPDATE tb_actives
+        SET
+            del_flag = '1',
+            updateId = #{updateId},
+            updatetime = current_time
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateJoinNumber" parameterType="com.example.community.bean.Active">
+        UPDATE tb_actives
+        SET
+            <if test="flag == true">
+                active_number = active_number + 1
+            </if>
+            <if test="flag == false">
+                active_number = active_number - 1
+            </if>
+        WHERE id = #{id}
+    </update>
+
+    <insert id="addJoinList" parameterType="com.example.community.bean.Join">
+        INSERT tb_joins
+        (activeId,joinId,joinName,joinTime)
+        VALUES
+        (#{activeId},#{joinId},#{joinName},current_time)
+    </insert>
+
+    <select id="getJoinList" parameterType="com.example.community.bean.Join" resultType="com.example.community.bean.Join">
+        SELECT id,activeId,joinName,joinId,joinTime
+        FROM tb_joins
+        WHERE activeId = #{activeId}
+    </select>
+
+    <delete id="deleteJoins" parameterType="com.example.community.bean.Join">
+        DELETE  FROM tb_joins
+        WHERE joinId = #{joinId}
+        AND activeId = #{activeId}
+        AND joinName = #{joinName}
+    </delete>
+</mapper>

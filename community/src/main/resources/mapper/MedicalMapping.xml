@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.community.dao.MedicalDao">
+<!--    获取业务列表-->
+    <select id="getMedicalList" parameterType="com.example.community.bean.Medical" resultType="com.example.community.bean.Medical">
+        SELECT DISTINCT a.id,a.businessNo,b.username,a.businessType,a.price,a.businessContent,a.businessOrganization,a.createTime,businessStatus,
+            (SELECT COUNT(DISTINCT a.id)
+                FROM tb_medical a,tb_user b,tb_doctor c,tb_appointment d,tb_doctor e
+                <where>
+                    a.createId = b.id
+                    <if test="username != '' and username != null">
+                        AND b.username like "%"#{username}"%"
+                    </if>
+                    <if test="roleId == 2">
+                        AND a.businessNo = d.appointNo
+                        AND d.doctorId = e.id
+                        AND e.doctor = #{doctor}
+                    </if>
+                    <if test="businessType != '' and businessType != null">
+                        AND a.businessType = #{businessType}
+                    </if>
+                    <if test="businessOrganization != '' and businessOrganization != null">
+                        AND a.businessOrganization like "%"#{businessOrganization}"%"
+                    </if>
+                    <if test="businessStatus != '' and businessStatus != null">
+                        AND a.businessStatus= #{businessStatus}
+                    </if>
+                    AND a.del_flag = 0
+                    AND b.del_flag = 0
+                </where>
+        )AS total
+        FROM tb_medical a,tb_user b,tb_doctor c,tb_appointment d,tb_doctor e
+        <where>
+            a.createId = b.id
+            <if test="username != '' and username != null">
+                AND b.username like "%"#{username}"%"
+            </if>
+            <if test="roleId == 2">
+                AND a.businessNo = d.appointNo
+                AND d.doctorId = e.id
+                AND e.doctor = #{doctor}
+            </if>
+            <if test="businessType != '' and businessType != null">
+                AND a.businessType = #{businessType}
+            </if>
+            <if test="businessOrganization != '' and businessOrganization != null">
+                AND a.businessOrganization like "%"#{businessOrganization}"%"
+            </if>
+            <if test="businessStatus != '' and businessStatus != null">
+                AND a.businessStatus= #{businessStatus}
+            </if>
+                AND a.del_flag = 0
+                AND b.del_flag = 0
+        </where>
+        ORDER BY a.id
+        LIMIT #{pageStart},#{pageSize}
+    </select>
+
+<!--    获取药店列表-->
+    <select id="getPharmacyList" parameterType="com.example.community.bean.Pharmacy" resultType="com.example.community.bean.Pharmacy">
+        SELECT id,name,photo,address,value,monthlySale,startDelivery,delivery,distance,deliveryTime,
+        (SELECT COUNT(*)
+            FROM tb_pharmacy
+        <where>
+            1 = 1
+            <if test="name != null and name != ''">
+                AND name like "%"#{name}"%"
+            </if>
+            AND del_flag = 0
+        </where>
+        ) AS total
+        FROM tb_pharmacy
+        <where>
+            1 = 1
+            <if test="name != null and name != ''">
+                AND name like "%"#{name}"%"
+            </if>
+                AND del_flag = 0
+        </where>
+        ORDER BY id
+        LIMIT #{pageStart},#{pageSize}
+    </select>
+
+<!--    删除业务-->
+    <update id="deleteMedical" parameterType="com.example.community.bean.Medical">
+        UPDATE tb_medical
+            SET
+                del_flag = 1,
+                updateId = #{updateId},
+                updatetime = current_time
+            WHERE
+                id = #{id}
+    </update>
+
+<!--    添加药店-->
+    <insert id="insertPharmacy" parameterType="com.example.community.bean.Pharmacy">
+        INSERT tb_pharmacy
+        (name,photo,address,value,monthlySale,startDelivery,delivery,distance,deliveryTime,createId,createtime,del_flag)
+        VALUES
+        (#{name},#{photo},#{address},#{value},0,#{startDelivery},#{delivery},#{distance},#{deliveryTime},#{createId},current_time,0)
+    </insert>
+<!-- 查询药品-->
+    <select id="getDrugList" parameterType="com.example.community.bean.Drug" resultType="com.example.community.bean.Drug">
+        SELECT a.id,a.pharmacy_id AS pharmacyId,a.drugName,a.photo,a.drugNumber,a.unit,a.price,a.termOfValidity,a.explain,
+        (SELECT COUNT(*)
+        FROM tb_drug a
+        LEFT JOIN tb_pharmacy b
+        ON a.pharmacy_id = b.id
+        LEFT JOIN tb_drugType c
+        ON a.drugTypeId = c.id
+        <where>
+            1 = 1
+            <if test="drugName != '' and drugName != null">
+                AND a.drugName like "%"#{drugName}"%"
+            </if>
+            AND c.drugType = #{drugType}
+            AND a.del_flag = 0
+            AND a.pharmacy_id = #{pharmacyId}
+        </where>
+        ) AS total
+        FROM tb_drug a
+        LEFT JOIN tb_pharmacy b
+        ON a.pharmacy_id = b.id
+        LEFT JOIN tb_drugType c
+        ON a.drugTypeId = c.id
+        <where>
+            1 = 1
+            <if test="drugName != '' and drugName != null">
+                AND a.drugName like "%"#{drugName}"%"
+            </if>
+                AND c.drugType = #{drugType}
+                AND a.del_flag = 0
+                AND a.pharmacy_id = #{pharmacyId}
+        </where>
+    </select>
+<!--查询药品种类-->
+    <select id="getDrugTypeList" resultType="com.example.community.bean.Drug">
+            SELECT id AS drugTypeId,drugType
+            FROM tb_drugType
+    </select>
+<!--添加药品-->
+    <insert id="insertDrug" parameterType="com.example.community.bean.Drug">
+        INSERT tb_drug
+        (pharmacy_id,drugName,photo,drugNumber,unit,price,termOfValidity,`explain`,drugTypeId,createId,createtime,del_flag)
+        VALUES
+        (#{pharmacyId},#{drugName},#{photo},#{drugNumber},#{unit},#{price},#{termOfValidity},#{explain},#{drugTypeId},#{createId},current_time,0)
+    </insert>
+<!--查询医院-->
+    <select id="getHospitalList" parameterType="com.example.community.bean.Hospital" resultType="com.example.community.bean.Hospital">
+        SELECT id,hospitalName,logo,address,grade,registerTime,
+        (SELECT
+            COUNT(*)
+            FROM
+            tb_hospital
+        <where>
+            1 = 1
+            <if test="hospitalName != '' and hospitalName != null">
+                AND hospitalName like "%"#{hospitalName}"%"
+            </if>
+            <if test="address != '' and address != null">
+                AND address like "%"#{address}"%"
+            </if>
+            AND del_flag = 0
+        </where>
+        ) AS total
+        FROM
+        tb_hospital
+        <where>
+            1 = 1
+            <if test="hospitalName != '' and hospitalName != null">
+               AND hospitalName like "%"#{hospitalName}"%"
+            </if>
+            <if test="address != '' and address != null">
+                AND address like "%"#{address}"%"
+            </if>
+               AND del_flag = 0
+        </where>
+        ORDER BY id
+        LIMIT #{pageStart},#{pageSize}
+    </select>
+
+<!--    添加医院-->
+    <insert id="insertHospital" parameterType="com.example.community.bean.Hospital">
+        INSERT tb_hospital
+        (hospitalName,logo,address,grade,registerTime,createId,createtime,del_flag)
+        VALUES
+        (#{hospitalName},#{logo},#{address},#{grade},#{registerTime},#{createId},current_time,0)
+    </insert>
+
+    <select id="getDepartmentDrop" resultType="com.example.community.bean.Department">
+        SELECT id AS departmentId,departmentName
+        FROM tb_department
+    </select>
+
+    <select id="getHospitalDrop" resultType="com.example.community.bean.Hospital">
+        SELECT id AS hospitalId,hospitalName
+        FROM tb_hospital
+    </select>
+
+    <select id="getDoctorDrop" parameterType="com.example.community.bean.Doctor" resultType="com.example.community.bean.Doctor">
+        SELECT id AS doctorId,doctor
+        FROM tb_doctor
+        WHERE
+            hospitalId = #{hospitalId}
+        AND departmentId = #{departmentId}
+    </select>
+
+    <select id="getHospitalInfo" parameterType="com.example.community.bean.Hospital" resultType="com.example.community.bean.Hospital">
+        SELECT id,hospitalName,address,registerTime
+        FROM tb_hospital
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insertAppointment" parameterType="com.example.community.bean.Appointment">
+        INSERT tb_appointment
+        (appointNo,hospitalName,doctorId,departmentId,appointTime,price,createId,createtime,del_flag)
+        VALUES
+        (#{appointNo},#{hospitalName},#{doctorId},#{departmentId},#{appointTime},#{price},#{createId},current_time,0)
+    </insert>
+
+    <insert id="insertMedical" parameterType="com.example.community.bean.Medical">
+        INSERT tb_medical
+        (businessNo,price,businessType,businessContent,businessOrganization,businessStatus,createTime,createId,del_flag)
+        VALUES
+        (#{businessNo},#{price},#{businessType},#{businessContent},#{businessOrganization},#{businessStatus},current_time,#{createId},0)
+    </insert>
+
+
+    <select id="getMedicalInfo" parameterType="com.example.community.bean.Appointment" resultType="com.example.community.bean.Appointment">
+        SELECT a.appointNo,a.hospitalName,a.doctorId,a.departmentId,a.appointTime,a.price,c.id AS hospitalId,c.address
+        FROM tb_appointment a
+        LEFT JOIN tb_hospital c
+        ON a.hospitalName = c.hospitalName
+        WHERE
+        a.appointNo = #{appointNo}
+    </select>
+
+    <update id="updateAppointment" parameterType="com.example.community.bean.Appointment">
+        UPDATE tb_appointment
+        SET
+            doctorId = #{doctorId},
+            departmentId = #{departmentId},
+            appointTime = #{appointTime},
+            updatetime = current_time,
+            updateId = #{updateId}
+        WHERE
+            appointNo = #{appointNo}
+    </update>
+
+    <update id="updateMedical" parameterType="com.example.community.bean.Medical">
+        UPDATE tb_medical
+        SET
+            businessContent = #{businessContent},
+            businessOrganization = #{businessOrganization},
+            createtime = current_time,
+            updatetime = current_time,
+            updateId = #{updateId}
+        WHERE businessNo = #{businessNo}
+    </update>
+
+    <update id="updateStatus" parameterType="com.example.community.bean.Medical">
+        UPDATE tb_medical
+            SET
+                businessStatus = #{businessStatus},
+                updateId = #{updateId},
+                updatetime = current_time
+            WHERE
+                  businessNo = #{businessNo}
+    </update>
+
+
+</mapper>
