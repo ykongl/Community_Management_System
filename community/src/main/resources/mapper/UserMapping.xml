@@ -85,6 +85,7 @@
     LEFT JOIN tb_communities c
     ON a.communityCd = c.community_code
     WHERE a.id = #{id}
+    and a.del_flag = 0
     </select>
 
     <update id="updateUser" parameterType="com.example.community.bean.User">

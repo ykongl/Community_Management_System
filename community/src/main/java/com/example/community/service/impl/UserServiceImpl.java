@@ -26,11 +26,12 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public List<User> getAllUser(User user) {
-        int pageStart = (user.getPageNum() - 1) * user.getPageSize();//分页
+        //分页
+        int pageStart = (user.getPageNum() - 1) * user.getPageSize();
         user.setPageStart(pageStart);
         List<User> users = userDao.getAllUser(user);
         users.stream().forEach(user1 -> {
-            if(user1.getSex().equals("0")){
+            if("0".equals(user1.getSex())){
                 user1.setSex("男");
             }else{
                 user1.setSex("女");
@@ -55,9 +56,8 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public String updateState(User user) {
-        int i =  userDao.updateState(user);
-        return i > 0 ? "success" : "error";
+    public int updateState(User user) {
+        return userDao.updateState(user);
     }
 
     /**
@@ -66,10 +66,9 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public String insertUser(User user) {
+    public int insertUser(User user) {
         user.setState(true);
-        int i = userDao.insertUser(user);
-        return i > 0 ? "success" : "error";
+        return userDao.insertUser(user);
     }
 
     /**
@@ -78,9 +77,8 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public String deleteUser(User user) {
-        int i = userDao.deleteUser(user);
-        return i > 0 ? "success" : "error";
+    public int deleteUser(User user) {
+        return userDao.deleteUser(user);
     }
 
     /**
@@ -99,9 +97,8 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public String updateUser(User user) {
-        int i = userDao.updateUser(user);
-        return i > 0 ? "success" : "error";
+    public int updateUser(User user) {
+        return userDao.updateUser(user);
     }
 
 

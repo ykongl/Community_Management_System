@@ -24,28 +24,30 @@ public interface UserService {
     /**
      * 修改用户状态
      */
-    public String updateState(User user);
+    public int updateState(User user);
 
     /**
      * 添加用户
      */
-    public String insertUser(User user);
+    public int insertUser(User user);
 
 
     /**
      * 删除用户
      */
-    public String deleteUser(User user);
+    public int deleteUser(User user);
 
     /**
      * 获取用户详情
+     * @param user
+     * @return
      */
     public User selectUserById(User user);
 
     /**
      * 修改用户
      */
-    public String updateUser(User user);
+    public int updateUser(User user);
 
 
 

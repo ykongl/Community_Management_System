@@ -1,12 +1,12 @@
 package com.example.community.controller;
 
-import com.alibaba.fastjson.JSON;
+import com.example.community.bean.Result;
 import com.example.community.bean.User;
 import com.example.community.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import java.util.HashMap;
+
 import java.util.List;
 
 /**
@@ -17,25 +17,19 @@ import java.util.List;
 @RestController
 @RequestMapping("/User")
 public class UserController {
+
     @Resource
     private UserService userService;
 
     /**
      * 获取用户列表
-     * @param user
-     * @return
      */
-
     @GetMapping("/list")
-    public String getUserList(User user){
-        int number = userService.getUserCounts(user);//用户数量
+    public Result getUserList(User user){
+        int number = userService.getUserCounts(user);
+        //用户数量
         List<User> allUser = userService.getAllUser(user);
-        HashMap<String, Object> res = new HashMap<>();
-        res.put("number",number);
-        res.put("data",allUser);
-        //转成String类型
-        String s = JSON.toJSONString(res);
-        return s;
+        return Result.ok(allUser,number);
     }
 
     /**
@@ -44,8 +38,9 @@ public class UserController {
      * @return
      */
     @PostMapping("/updateState")
-    public String UpdateState(User user){
-        return userService.updateState(user);
+    public Result updateState(User user){
+        userService.updateState(user);
+        return Result.ok();
     }
 
     /**
@@ -54,8 +49,9 @@ public class UserController {
      * @return
      */
     @PostMapping("/insertUser")
-    public String InsertUser(@RequestBody User user){
-        return userService.insertUser(user);
+    public Result insertUser(@RequestBody User user){
+         userService.insertUser(user);
+         return Result.ok();
     }
 
     /**
@@ -64,8 +60,9 @@ public class UserController {
      * @return
      */
     @PostMapping("/deleteUser")
-    public String DeleteUser(User user){
-        return userService.deleteUser(user);
+    public Result deleteUser(User user){
+        userService.deleteUser(user);
+        return Result.ok();
     }
 
     /**
@@ -74,8 +71,12 @@ public class UserController {
      * @return
      */
     @GetMapping("/userId")
-    public User selectUserById(User user){
-        return userService.selectUserById(user);
+    public Result selectUserById(User user){
+        User user1 = userService.selectUserById(user);
+        if (user1 == null) {
+            return Result.error("");
+        }
+        return Result.ok(user1);
     }
 
     /**
@@ -84,8 +85,9 @@ public class UserController {
      * @return
      */
     @PostMapping("/editUser")
-    public String updateUser(@RequestBody User user){
-        return userService.updateUser(user);
+    public Result updateUser(@RequestBody User user){
+        userService.updateUser(user);
+        return Result.ok();
     }
 
 
@@ -96,7 +98,8 @@ public class UserController {
      * @return
      */
     @GetMapping("/address")
-    public List<User> selectAddress(User user){
-        return userService.selectAddress(user);
+    public Result selectAddress(User user){
+        List<User> users = userService.selectAddress(user);
+        return Result.ok(users, users.size());
     }
 }
