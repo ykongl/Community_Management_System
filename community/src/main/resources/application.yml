@@ -9,6 +9,6 @@ spring:
 
 mybatis:
   mapper-locations: classpath:mapper/*.xml
-  type-aliases-package: com.example.demo.model
+  type-aliases-package: com.example.community.bean
 server:
   port: 9001
